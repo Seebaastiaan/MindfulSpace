@@ -1,6 +1,5 @@
-// lib/firebase.js
-import { getAnalytics } from "firebase/analytics";
-import { getApp, getApps, initializeApp } from "firebase/app";
+// src/lib/firebase.ts
+import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
@@ -10,13 +9,12 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Evita inicializar Firebase más de una vez
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
 
-export { analytics, app, auth, googleProvider };
+// ✅ Siempre retorna un Auth válido
+export const auth = getAuth(app);
+
+// ✅ Siempre retorna un GoogleAuthProvider válido
+export const googleProvider = new GoogleAuthProvider();

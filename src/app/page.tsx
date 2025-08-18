@@ -6,17 +6,22 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { Button } from "@mui/material";
 import { signInWithPopup, User } from "firebase/auth";
 import { useState } from "react";
+
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+
   const loginWithGoogle = async () => {
     if (loading) return; // evita abrir múltiples popups
     setLoading(true);
     try {
+      if (!auth) throw new Error("Firebase Auth no está inicializado");
       const result = await signInWithPopup(auth, googleProvider);
       setUser(result.user);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,8 +36,8 @@ export default function HomePage() {
             color: "#FFC0CB",
             borderColor: "white",
             "&.Mui-disabled": {
-              color: "#FFC0CB",
-              borderColor: "#FFC0CB",
+              color: "#FFC0CB", // mantiene el color al deshabilitarse
+              borderColor: "#FFC0CB", // mantiene el borde al deshabilitarse
             },
           }}
           disabled={loading}
