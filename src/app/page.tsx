@@ -5,7 +5,6 @@ import { auth, googleProvider } from "@/lib/firebase";
 import GoogleIcon from "@mui/icons-material/Google";
 import { Button } from "@mui/material";
 import { signInWithPopup, User } from "firebase/auth";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -20,14 +19,13 @@ export default function HomePage() {
       console.error(err);
     }
   };
-  const router = useRouter();
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950">
       {!user ? (
         <Button
           startIcon={loading ? null : <GoogleIcon />}
-          //onClick={loginWithGoogle}
-          onClick={() => router.push("/main")}
+          onClick={loginWithGoogle}
           variant="outlined"
           sx={{
             color: "#FFC0CB",

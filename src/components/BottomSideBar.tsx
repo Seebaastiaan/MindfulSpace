@@ -57,7 +57,7 @@ export default function Bottomsidebar() {
         }}
       >
         <BottomNavigationAction label="Menu" icon={<HomeIcon />} />
-        <BottomNavigationAction label="Chssat" icon={<ChatIcon />} />
+        <BottomNavigationAction label="Chat" icon={<ChatIcon />} />
         <BottomNavigationAction label="Diario" icon={<BookIcon />} />
         <BottomNavigationAction label="?" icon={<QuestionMarkIcon />} />
       </BottomNavigation>
