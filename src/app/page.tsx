@@ -36,8 +36,8 @@ export default function HomePage() {
             color: "#FFC0CB",
             borderColor: "white",
             "&.Mui-disabled": {
-              color: "#FFC0CB", // mantiene el color al deshabilitarse
-              borderColor: "#FFC0CB", // mantiene el borde al deshabilitarse
+              color: "#FFC0CB",
+              borderColor: "#FFC0CB",
             },
           }}
           disabled={loading}

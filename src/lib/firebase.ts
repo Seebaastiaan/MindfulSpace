@@ -1,6 +1,6 @@
-// src/lib/firebase.ts
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,11 +14,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// ✅ Siempre retorna un Auth válido
 export const auth = getAuth(app);
 
-// ✅ Siempre retorna un GoogleAuthProvider válido
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   client_id: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_ID!,
 });
+
+export const db = getFirestore(app);
