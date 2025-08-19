@@ -26,18 +26,18 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-200">
       {!user ? (
         <Button
           startIcon={loading ? null : <GoogleIcon />}
           onClick={loginWithGoogle}
           variant="outlined"
           sx={{
-            color: "#FFC0CB",
-            borderColor: "white",
+            color: "#c80323",
+            borderColor: "#c80323",
             "&.Mui-disabled": {
-              color: "#FFC0CB",
-              borderColor: "#FFC0CB",
+              color: "#c80323",
+              borderColor: "#c80323",
             },
           }}
           disabled={loading}

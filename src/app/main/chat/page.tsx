@@ -225,7 +225,7 @@ export default function ChatPage() {
         </div>
 
         {/* Chat Container */}
-        <div className="bg-white shadow-lg h-[50vh] min-h-[65vh] overflow-y-auto p-6 border-x flex flex-col">
+        <div className="bg-white shadow-lg h-[50vh] min-h-[50vh] overflow-y-auto p-6 border-x flex flex-col">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center flex-1 text-center">
               <div className="w-20 h-20 bg-[#FFC0CB] rounded-full flex items-center justify-center mb-4">

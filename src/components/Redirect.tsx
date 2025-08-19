@@ -36,11 +36,11 @@ export default function Redirect() {
   }, [router]);
 
   return (
-    <div className="min-h-screen w-full bg-black flex flex-col items-center justify-center text-white">
+    <div className="min-h-screen w-full bg-gray-200 flex flex-col items-center justify-center text-black">
       <h1 className="text-2xl mb-6">Redirigiendo...</h1>
       <Progress
         value={progress}
-        className="w-[60%] rounded-full bg-gray-800 [--tw-bg-opacity:1] [&>div]:bg-[#FFC0CB]"
+        className="w-[60%] rounded-full bg-gray-800 [--tw-bg-opacity:1] [&>div]:bg-[#c80323]"
       />
     </div>
   );
