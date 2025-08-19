@@ -1,6 +1,8 @@
 "use client";
-
 import { auth, db, googleProvider } from "@/lib/firebase";
+import PersonIcon from "@mui/icons-material/Person";
+import SendIcon from "@mui/icons-material/Send";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 import type { User } from "firebase/auth";
 import { signInWithPopup, signOut } from "firebase/auth";
 import {
@@ -12,7 +14,6 @@ import {
   where,
 } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
-
 type Message = {
   id?: string;
   text: string;
@@ -212,42 +213,25 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto min-h-[90vh]">
         {/* Header */}
         <div className="bg-white rounded-t-2xl shadow-lg p-6 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
               Chat de Apoyo Emocional
             </h1>
-            <p className="text-gray-600 text-sm">
-              Asistente empático disponible 24/7
-            </p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-700">
-                {user.displayName || user.email}
-              </p>
-              <div className="flex items-center justify-end space-x-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-xs text-gray-500">En línea</span>
-              </div>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition duration-200"
-            >
-              Salir
-            </button>
+            <p className="text-gray-600 text-sm">Asistente disponible 24/7</p>
           </div>
         </div>
 
         {/* Chat Container */}
-        <div className="bg-white shadow-lg h-96 overflow-y-auto p-6 border-x">
+        <div className="bg-white shadow-lg h-[50vh] min-h-[65vh] overflow-y-auto p-6 border-x flex flex-col">
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <span className="text-3xl">🤖</span>
+            <div className="flex flex-col items-center justify-center flex-1 text-center">
+              <div className="w-20 h-20 bg-[#FFC0CB] rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">
+                  <SmartToyIcon></SmartToyIcon>
+                </span>
               </div>
               <h3 className="text-lg font-semibold text-gray-700 mb-2">
                 ¡Hola! Soy tu asistente de apoyo emocional
@@ -258,7 +242,7 @@ export default function ChatPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 flex-1">
               {messages.map((msg, i) => (
                 <div
                   key={msg.id || i}
@@ -274,18 +258,25 @@ export default function ChatPage() {
                     }`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                      className={`min-w-8 min-h-8 rounded-full flex items-center justify-center text-base leading-none ${
                         msg.sender === "user"
-                          ? "bg-green-500 text-white"
-                          : "bg-blue-500 text-white"
+                          ? "bg-[#FA506D] text-white"
+                          : "bg-[#c80323] text-white"
                       }`}
                     >
-                      {msg.sender === "user" ? "👤" : "🤖"}
+                      <span className="select-none">
+                        {msg.sender === "user" ? (
+                          <PersonIcon />
+                        ) : (
+                          <SmartToyIcon />
+                        )}
+                      </span>
                     </div>
+
                     <div
                       className={`px-4 py-2 rounded-2xl shadow-sm ${
                         msg.sender === "user"
-                          ? "bg-green-500 text-white rounded-br-md"
+                          ? "bg-[#FA506D] text-white rounded-br-md"
                           : "bg-gray-100 text-gray-800 rounded-bl-md"
                       }`}
                     >
@@ -298,8 +289,8 @@ export default function ChatPage() {
               {isTyping && (
                 <div className="flex justify-start">
                   <div className="flex items-start space-x-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-sm text-white">
-                      🤖
+                    <div className="w-8 h-8 bg-[#c80323] rounded-full flex items-center justify-center text-sm text-white">
+                      <SmartToyIcon />
                     </div>
                     <div className="bg-gray-100 px-4 py-2 rounded-2xl rounded-bl-md shadow-sm">
                       <div className="flex space-x-1">
@@ -324,28 +315,31 @@ export default function ChatPage() {
 
         {/* Input */}
         <div className="bg-white rounded-b-2xl shadow-lg p-6">
-          <div className="flex space-x-4">
+          <div className="flex w-full space-x-4">
+            {/* Input con 3/4 */}
             <input
-              className="flex-1 border border-gray-300 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-3/4 border border-gray-300 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Escribe tu mensaje aquí..."
+              placeholder="Escribe tu mensaje"
               onKeyDown={handleKeyPress}
               disabled={isTyping}
             />
+
+            {/* Botón con 1/4 */}
             <button
-              className={`px-6 py-3 rounded-full font-semibold transition duration-200 ${
+              className={`w-1/4 px-6 py-3 cursor-pointer rounded-full font-semibold transition duration-200 ${
                 isTyping || !input.trim()
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg"
+                  : "bg-[#FFC0CB]  text-white shadow-md hover:shadow-lg"
               }`}
               onClick={sendMessage}
               disabled={isTyping || !input.trim()}
             >
               {isTyping ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500 mx-auto"></div>
               ) : (
-                "Enviar"
+                <SendIcon />
               )}
             </button>
           </div>
