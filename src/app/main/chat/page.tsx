@@ -10,6 +10,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  where,
 } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 
@@ -17,7 +18,7 @@ type Message = {
   id?: string;
   text: string;
   sender: "user" | "bot";
-  uid?: string;
+  uid: string; // ✅ Ahora siempre será el UID del usuario propietario
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createdAt: any; // Timestamp de Firestore
 };
@@ -46,12 +47,19 @@ export default function ChatPage() {
     return () => unsubscribe();
   }, []);
 
-  // Escuchar mensajes en tiempo real solo si hay usuario
+  // ✅ SOLUCION: Escuchar SOLO mensajes del usuario actual
   useEffect(() => {
     if (!user) return;
 
     console.log("Configurando listener de Firestore para:", user.uid);
-    const q = query(collection(db, "chat"), orderBy("createdAt"));
+
+    // ✅ Query mejorado: Solo mensajes donde uid = user.uid
+    const q = query(
+      collection(db, "chat"),
+      where("uid", "==", user.uid),
+      orderBy("createdAt")
+    );
+
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -61,13 +69,8 @@ export default function ChatPage() {
           msgs.push({ ...data, id: doc.id });
         });
 
-        // Filtrar mensajes del usuario actual y del bot
-        const filteredMessages = msgs.filter(
-          (m) => m.uid === user.uid || m.sender === "bot" || m.uid === "bot"
-        );
-
-        console.log("Mensajes recibidos:", filteredMessages.length);
-        setMessages(filteredMessages);
+        console.log("Mensajes recibidos para el usuario:", msgs.length);
+        setMessages(msgs);
       },
       (error) => {
         console.error("Error al escuchar Firestore:", error);
@@ -98,7 +101,7 @@ export default function ChatPage() {
     }
   };
 
-  // Enviar mensaje
+  // ✅ SOLUCION: Enviar mensaje corregido
   const sendMessage = async () => {
     if (!input.trim() || !user || isTyping) return;
 
@@ -109,17 +112,17 @@ export default function ChatPage() {
     setIsTyping(true);
 
     try {
-      // Guardar mensaje del usuario
+      // ✅ Guardar mensaje del usuario (mismo uid que siempre)
       await addDoc(collection(db, "chat"), {
         text: userMessage,
         sender: "user",
-        uid: user.uid,
+        uid: user.uid, // ✅ UID del usuario
         createdAt: serverTimestamp(),
       });
 
       console.log("Mensaje del usuario guardado en Firestore");
 
-      // Enviar a tu API HuggingFace
+      // Enviar a tu API
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -137,11 +140,11 @@ export default function ChatPage() {
         throw new Error(data.error);
       }
 
-      // Guardar respuesta del bot
+      // ✅ CLAVE: Guardar respuesta del bot con el UID DEL USUARIO
       await addDoc(collection(db, "chat"), {
         text: data.result || "Lo siento, no pude procesar tu mensaje.",
         sender: "bot",
-        uid: "bot",
+        uid: user.uid, // ✅ IMPORTANTE: UID del usuario, NO "bot"
         createdAt: serverTimestamp(),
       });
 
@@ -149,11 +152,11 @@ export default function ChatPage() {
     } catch (err) {
       console.error("Error completo:", err);
 
-      // Guardar mensaje de error
+      // ✅ Guardar mensaje de error también con UID del usuario
       await addDoc(collection(db, "chat"), {
         text: "Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo.",
         sender: "bot",
-        uid: "bot",
+        uid: user.uid, // ✅ UID del usuario
         createdAt: serverTimestamp(),
       });
     } finally {
