@@ -7,7 +7,6 @@ import {
   addDoc,
   collection,
   onSnapshot,
-  orderBy,
   query,
   serverTimestamp,
   where,
@@ -56,8 +55,8 @@ export default function ChatPage() {
     // ✅ Query mejorado: Solo mensajes donde uid = user.uid
     const q = query(
       collection(db, "chat"),
-      where("uid", "==", user.uid),
-      orderBy("createdAt")
+      where("uid", "==", user.uid)
+      // Temporalmente sin orderBy para evitar problemas de índice
     );
 
     const unsubscribe = onSnapshot(
@@ -69,7 +68,11 @@ export default function ChatPage() {
           msgs.push({ ...data, id: doc.id });
         });
 
-        console.log("Mensajes recibidos para el usuario:", msgs.length);
+        // Ordenar manualmente por timestamp
+        msgs.sort((a, b) => {
+          if (!a.createdAt || !b.createdAt) return 0;
+          return a.createdAt.toMillis() - b.createdAt.toMillis();
+        });
         setMessages(msgs);
       },
       (error) => {
