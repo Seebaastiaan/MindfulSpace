@@ -9,7 +9,9 @@ export default function MainLayout({
   return (
     <div className="min-h-screen flex flex-col">
       {/* Contenido principal */}
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 p-4 flex flex-col">
+        {children}
+      </div>
 
       {/* Barra inferior siempre visible */}
       <div className="fixed bottom-0 left-0 right-0">
