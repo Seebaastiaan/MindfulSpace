@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       generationConfig: {
         temperature: 0.7,
         topP: 0.9,
-        maxOutputTokens: 120,
+        maxOutputTokens: 200,
       },
     });
 
@@ -30,10 +30,13 @@ export async function POST(req: NextRequest) {
 
 Características de tu respuesta:
 - Empática y comprensiva
-- Breve pero significativa (máximo 2-3 oraciones)
+- Breve pero significativa
 - Enfocada en validar emociones y ofrecer apoyo
 - En español
 - Tono cálido y profesional
+- No uses jerga técnica
+- No uses muletillas
+- Varía tus inicios de frase, evita repetir siempre "Entiendo". 
 
 Respuesta empática:`;
 
