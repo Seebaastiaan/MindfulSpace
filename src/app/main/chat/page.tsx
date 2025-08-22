@@ -11,15 +11,13 @@ import {
   onSnapshot,
   query,
   serverTimestamp,
-  where,
 } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
+
 type Message = {
   id?: string;
   text: string;
   sender: "user" | "bot";
-  uid: string; // ✅ Ahora siempre será el UID del usuario propietario
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createdAt: any; // Timestamp de Firestore
 };
 
@@ -41,24 +39,16 @@ export default function ChatPage() {
   // Escuchar autenticación
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((u) => {
-      console.log("Estado de autenticación:", u ? u.email : "No autenticado");
       setUser(u);
     });
     return () => unsubscribe();
   }, []);
 
-  // ✅ SOLUCION: Escuchar SOLO mensajes del usuario actual
+  // Escuchar mensajes del usuario
   useEffect(() => {
     if (!user) return;
 
-    console.log("Configurando listener de Firestore para:", user.uid);
-
-    // ✅ Query mejorado: Solo mensajes donde uid = user.uid
-    const q = query(
-      collection(db, "chat"),
-      where("uid", "==", user.uid)
-      // Temporalmente sin orderBy para evitar problemas de índice
-    );
+    const q = query(collection(db, "users", user.uid, "chat"));
 
     const unsubscribe = onSnapshot(
       q,
@@ -69,11 +59,12 @@ export default function ChatPage() {
           msgs.push({ ...data, id: doc.id });
         });
 
-        // Ordenar manualmente por timestamp
+        // Ordenar por timestamp
         msgs.sort((a, b) => {
           if (!a.createdAt || !b.createdAt) return 0;
           return a.createdAt.toMillis() - b.createdAt.toMillis();
         });
+
         setMessages(msgs);
       },
       (error) => {
@@ -105,64 +96,50 @@ export default function ChatPage() {
     }
   };
 
-  // ✅ SOLUCION: Enviar mensaje corregido
+  // Enviar mensaje
   const sendMessage = async () => {
     if (!input.trim() || !user || isTyping) return;
 
     const userMessage = input.trim();
-    console.log("Enviando mensaje:", userMessage);
-
     setInput("");
     setIsTyping(true);
 
     try {
-      // ✅ Guardar mensaje del usuario (mismo uid que siempre)
-      await addDoc(collection(db, "chat"), {
+      // Guardar mensaje del usuario
+      await addDoc(collection(db, "users", user.uid, "chat"), {
         text: userMessage,
         sender: "user",
-        uid: user.uid, // ✅ UID del usuario
         createdAt: serverTimestamp(),
       });
 
-      console.log("Mensaje del usuario guardado en Firestore");
-
-      // Enviar a tu API
+      // Enviar a tu API (si quieres análisis de sentimientos, etc.)
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: userMessage }),
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
       const data = await res.json();
-      console.log("Respuesta de la API:", data);
 
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // ✅ CLAVE: Guardar respuesta del bot con el UID DEL USUARIO
-      await addDoc(collection(db, "chat"), {
+      // Guardar respuesta del bot
+      await addDoc(collection(db, "users", user.uid, "chat"), {
         text: data.result || "Lo siento, no pude procesar tu mensaje.",
         sender: "bot",
-        uid: user.uid, // ✅ IMPORTANTE: UID del usuario, NO "bot"
         createdAt: serverTimestamp(),
       });
-
-      console.log("Respuesta del bot guardada en Firestore");
     } catch (err) {
       console.error("Error completo:", err);
 
-      // ✅ Guardar mensaje de error también con UID del usuario
-      await addDoc(collection(db, "chat"), {
-        text: "Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo.",
-        sender: "bot",
-        uid: user.uid, // ✅ UID del usuario
-        createdAt: serverTimestamp(),
-      });
+      // Guardar mensaje de error también
+      if (user) {
+        await addDoc(collection(db, "users", user.uid, "chat"), {
+          text: "Lo siento, hubo un error procesando tu mensaje. Por favor intenta de nuevo.",
+          sender: "bot",
+          createdAt: serverTimestamp(),
+        });
+      }
     } finally {
       setIsTyping(false);
     }
@@ -180,31 +157,18 @@ export default function ChatPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="mb-6">
-            <div className="w-16 h-16 bg-[#FFC0CB]rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-white text-2xl">💬</span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Chat de Apoyo Emocional
-            </h1>
-            <p className="text-gray-600">
-              Inicia sesión para comenzar a chatear con nuestro asistente de
-              apoyo
-            </p>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Chat de Apoyo Emocional
+          </h1>
+          <p className="text-gray-600 mb-6">
+            Inicia sesión para comenzar a chatear con nuestro asistente de apoyo
+          </p>
           <button
             onClick={signIn}
             disabled={isLoading}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center space-x-2"
+            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
           >
-            {isLoading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            ) : (
-              <>
-                <span>🔐</span>
-                <span>Iniciar sesión con Google</span>
-              </>
-            )}
+            {isLoading ? "Cargando..." : "Iniciar sesión con Google"}
           </button>
         </div>
       </div>
@@ -228,9 +192,7 @@ export default function ChatPage() {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1 text-center">
             <div className="w-20 h-20 bg-[#FFC0CB] rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl">
-                <SmartToyIcon></SmartToyIcon>
-              </span>
+              <SmartToyIcon />
             </div>
             <h3 className="text-lg font-semibold text-gray-700 mb-2">
               ¡Hola! Soy tu asistente de apoyo emocional
@@ -263,13 +225,7 @@ export default function ChatPage() {
                         : "bg-[#c80323] text-white"
                     }`}
                   >
-                    <span className="select-none">
-                      {msg.sender === "user" ? (
-                        <PersonIcon />
-                      ) : (
-                        <SmartToyIcon />
-                      )}
-                    </span>
+                    {msg.sender === "user" ? <PersonIcon /> : <SmartToyIcon />}
                   </div>
 
                   <div
@@ -315,7 +271,6 @@ export default function ChatPage() {
       {/* Input */}
       <div className="bg-white rounded-b-2xl shadow-lg p-6">
         <div className="flex w-full space-x-4">
-          {/* Input con 3/4 */}
           <input
             className="w-3/4 border border-gray-300 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
             value={input}
@@ -325,7 +280,6 @@ export default function ChatPage() {
             disabled={isTyping}
           />
 
-          {/* Botón con 1/4 */}
           <button
             className={`w-1/4 px-6 py-3 cursor-pointer rounded-full font-semibold transition duration-200 ${
               isTyping || !input.trim()
