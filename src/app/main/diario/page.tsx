@@ -18,6 +18,7 @@ function Diario() {
   const [user, setUser] = useState<User | null>(null);
   const [texto, setTexto] = useState("");
   const [cargando, setCargando] = useState(false);
+  const [preguntaActual, setPreguntaActual] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -47,6 +48,19 @@ function Diario() {
     }
   };
 
+  const preguntas = [
+    "¿Qué te hizo sonreír hoy?",
+    "¿Qué fue lo más bonito que viviste hoy?",
+    "¿Qué aprendiste de ti mismo hoy?",
+    "¿Qué momento del día agradeces más?",
+    "¿Qué te dio paz o tranquilidad hoy?",
+  ];
+
+  const elegirPregunta = () => {
+    const randomIndex = Math.floor(Math.random() * preguntas.length);
+    setPreguntaActual(preguntas[randomIndex]);
+  };
+
   return (
     <>
       <section className="w-full grid grid-cols-10 gap-4 mx-auto">
@@ -58,37 +72,40 @@ function Diario() {
             ¿Cómo te sientes hoy?
           </Typography>
 
-          <div className="mt-10 min-w-full font-medium bg-[#FA506D] rounded-2xl text-white text-xl p-3 text-center">
-            <Dialog>
-              <DialogTrigger>Escribir como me siento</DialogTrigger>
-              <DialogContent>
-                <DialogHeader className="flex flex-col h-[70vh]">
-                  <DialogTitle>Escribe como te sentiste hoy</DialogTitle>
+          <Dialog>
+            {/* Cuando se abre el diálogo, se elige una pregunta random */}
+            <DialogTrigger asChild className="mt-14">
+              <Button onClick={elegirPregunta}>Escribir como me siento</Button>
+            </DialogTrigger>
+            <DialogContent className="flex flex-col max-h-[80vh]">
+              <DialogHeader>
+                <DialogTitle>Escribe como te sentiste hoy</DialogTitle>
+              </DialogHeader>
 
-                  <div className="flex-1 flex flex-col">
-                    <article className="my-[50%]">
-                      ¿Qué te hizo sonreír hoy?
-                    </article>
+              {/* Contenido scrollable */}
+              <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
+                <article className="text-center mt-4">{preguntaActual}</article>
 
-                    <textarea
-                      placeholder="Escribe aquí..."
-                      value={texto}
-                      onChange={(e) => setTexto(e.target.value)}
-                      className="w-full flex-1 p-4 resize-none border-none outline-none focus:ring-0 mt-10"
-                    />
-                  </div>
+                <textarea
+                  placeholder="Escribe aquí..."
+                  value={texto}
+                  onChange={(e) => setTexto(e.target.value)}
+                  className="w-full flex-1 p-4 resize-none border rounded-xl outline-none focus:ring-0"
+                />
+              </div>
 
-                  <Button
-                    onClick={handleGuardar}
-                    disabled={cargando}
-                    className="mt-auto"
-                  >
-                    {cargando ? "Guardando..." : "Guardar"}
-                  </Button>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
-          </div>
+              {/* Footer fijo adentro del div blanco */}
+              <div className="mt-4">
+                <Button
+                  onClick={handleGuardar}
+                  disabled={cargando}
+                  className="w-full"
+                >
+                  {cargando ? "Guardando..." : "Guardar"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </Cards>
 
         <Cards className="col-span-5">racha</Cards>
