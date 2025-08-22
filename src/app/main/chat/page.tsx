@@ -4,13 +4,14 @@ import PersonIcon from "@mui/icons-material/Person";
 import SendIcon from "@mui/icons-material/Send";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import type { User } from "firebase/auth";
-import { signInWithPopup, signOut } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
 import {
   addDoc,
   collection,
   onSnapshot,
   query,
   serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 
@@ -18,7 +19,7 @@ type Message = {
   id?: string;
   text: string;
   sender: "user" | "bot";
-  createdAt: any; // Timestamp de Firestore
+  createdAt: Timestamp; // Cambio de any a Timestamp
 };
 
 export default function ChatPage() {
@@ -33,7 +34,6 @@ export default function ChatPage() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
   useEffect(scrollToBottom, [messages]);
 
   // Escuchar autenticación
@@ -49,7 +49,6 @@ export default function ChatPage() {
     if (!user) return;
 
     const q = query(collection(db, "users", user.uid, "chat"));
-
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -84,15 +83,6 @@ export default function ChatPage() {
       console.error("Error al iniciar sesión:", err);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Logout
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      console.error("Error al cerrar sesión:", err);
     }
   };
 
