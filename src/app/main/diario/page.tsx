@@ -1,4 +1,4 @@
-// pages/Diario.tsx - Versión integrada con análisis de sentimientos
+// pages/Diario.tsx - Versión integrada con análisis de sentimientos (CORREGIDA)
 "use client";
 import Button from "@/components/Button";
 import Cards from "@/components/Cards";
@@ -21,12 +21,14 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
+  where,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function Diario() {
   const [user, setUser] = useState<User | null>(null);
@@ -36,22 +38,91 @@ function Diario() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [lastEntryDate, setLastEntryDate] = useState<string | null>(null);
+  const [hasWrittenTodayState, setHasWrittenTodayState] = useState(false);
+  const [checkingTodayEntry, setCheckingTodayEntry] = useState(true);
 
   // Nuevos estados para análisis de sentimientos
   const [totalEntries, setTotalEntries] = useState(0);
   const [canAnalyzeEmotions, setCanAnalyzeEmotions] = useState(false);
+
+  // Función unificada para cargar todos los datos del usuario
+  const loadUserData = useCallback(async (userId: string) => {
+    try {
+      setCheckingTodayEntry(true);
+
+      // Cargar en paralelo: racha, estadísticas y verificar entrada de hoy
+      const [, , todayEntryExists] = await Promise.all([
+        loadStreakData(userId),
+        loadDiaryStats(userId),
+        checkIfWroteToday(userId),
+      ]);
+
+      setHasWrittenTodayState(todayEntryExists);
+    } catch (error) {
+      console.error("Error al cargar datos del usuario:", error);
+    } finally {
+      setCheckingTodayEntry(false);
+    }
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
 
       if (currentUser) {
-        loadStreakData(currentUser.uid);
-        loadDiaryStats(currentUser.uid);
+        // Resetear estados cuando cambia de usuario
+        setCurrentStreak(0);
+        setLastEntryDate(null);
+        setHasWrittenTodayState(false);
+        setTotalEntries(0);
+        setCanAnalyzeEmotions(false);
+        setCheckingTodayEntry(true);
+
+        // Cargar datos del usuario actual
+        loadUserData(currentUser.uid);
+      } else {
+        // Limpiar estados cuando no hay usuario
+        setCurrentStreak(0);
+        setLastEntryDate(null);
+        setHasWrittenTodayState(false);
+        setTotalEntries(0);
+        setCanAnalyzeEmotions(false);
+        setCheckingTodayEntry(false);
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [loadUserData]);
+
+  // Verificar si el usuario escribió hoy en la base de datos
+  const checkIfWroteToday = async (userId: string): Promise<boolean> => {
+    try {
+      const today = new Date();
+      const startOfDay = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+      const endOfDay = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() + 1
+      );
+
+      const diaryRef = collection(db, "users", userId, "diario");
+      const todayQuery = query(
+        diaryRef,
+        where("fecha", ">=", startOfDay),
+        where("fecha", "<", endOfDay),
+        limit(1)
+      );
+
+      const snapshot = await getDocs(todayQuery);
+      return !snapshot.empty;
+    } catch (error) {
+      console.error("Error al verificar entrada de hoy:", error);
+      return false;
+    }
+  };
 
   // Cargar estadísticas del diario
   const loadDiaryStats = async (userId: string) => {
@@ -63,8 +134,11 @@ function Diario() {
       const entriesCount = snapshot.size;
       setTotalEntries(entriesCount);
       setCanAnalyzeEmotions(entriesCount >= 3); // Mínimo 3 entradas para análisis
+
+      return entriesCount;
     } catch (error) {
       console.error("Error al cargar estadísticas:", error);
+      return 0;
     }
   };
 
@@ -76,22 +150,22 @@ function Diario() {
 
       if (streakDoc.exists()) {
         const data = streakDoc.data();
-        setCurrentStreak(data.count || 0);
-        setLastEntryDate(data.lastEntryDate || null);
+        const streakCount = data.count || 0;
+        const lastEntry = data.lastEntryDate || null;
+
+        setCurrentStreak(streakCount);
+        setLastEntryDate(lastEntry);
+
+        return { count: streakCount, lastEntryDate: lastEntry };
+      } else {
+        setCurrentStreak(0);
+        setLastEntryDate(null);
+        return { count: 0, lastEntryDate: null };
       }
     } catch (error) {
       console.error("Error al cargar datos de racha:", error);
+      return { count: 0, lastEntryDate: null };
     }
-  };
-
-  // Verificar si ya escribió hoy
-  const hasWrittenToday = () => {
-    if (!lastEntryDate) return true;
-
-    const today = new Date().toDateString();
-    const lastEntry = new Date(lastEntryDate).toDateString();
-
-    return today === lastEntry;
   };
 
   // Verificar si la racha debe continuar o romperse
@@ -130,10 +204,15 @@ function Diario() {
   const handleGuardar = async () => {
     if (!texto.trim() || !user) return;
 
-    // Verificar si ya escribió hoy
-    if (hasWrittenToday()) {
+    // Verificar nuevamente en tiempo real si ya escribió hoy
+    const alreadyWroteToday = await checkIfWroteToday(user.uid);
+    if (alreadyWroteToday) {
+      alert(
+        "Ya escribiste una entrada hoy. ¡Vuelve mañana para mantener tu racha!"
+      );
       setTexto("");
       setDialogOpen(false);
+      setHasWrittenTodayState(true);
       return;
     }
 
@@ -157,10 +236,11 @@ function Diario() {
       setCurrentStreak(newStreak);
       await updateStreakInFirestore(newStreak);
 
-      // Actualizar estadísticas locales
+      // Actualizar estados locales
       const newTotal = totalEntries + 1;
       setTotalEntries(newTotal);
       setCanAnalyzeEmotions(newTotal >= 3);
+      setHasWrittenTodayState(true); // Marcar que ya escribió hoy
 
       setTexto("");
       setDialogOpen(false);
@@ -175,6 +255,7 @@ function Diario() {
       }
     } catch (error) {
       console.error("Error al guardar en Firestore:", error);
+      alert("Error al guardar la entrada. Por favor, intenta de nuevo.");
     } finally {
       setCargando(false);
     }
@@ -195,6 +276,20 @@ function Diario() {
     const randomIndex = Math.floor(Math.random() * preguntas.length);
     setPreguntaActual(preguntas[randomIndex]);
   };
+
+  // Mostrar loading mientras se verifica si escribió hoy
+  if (checkingTodayEntry) {
+    return (
+      <section className="w-full grid grid-cols-10 gap-4 mx-auto">
+        <Cards className="col-span-10">
+          <div className="flex items-center justify-center py-8">
+            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span className="ml-2 text-gray-600">Cargando...</span>
+          </div>
+        </Cards>
+      </section>
+    );
+  }
 
   return (
     <>
@@ -221,10 +316,11 @@ function Diario() {
           </div>
 
           {/* Mostrar si ya escribió hoy */}
-          {hasWrittenToday() && (
+          {hasWrittenTodayState && (
             <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-sm text-green-700">
-                ✅ Ya escribiste hoy. ¡Racha mantenida!
+                ✅ Ya escribiste hoy. ¡Racha mantenida! Vuelve mañana para
+                continuar.
               </p>
             </div>
           )}
@@ -233,12 +329,14 @@ function Diario() {
             <DialogTrigger asChild className="mt-14 cursor-pointer">
               <Button
                 onClick={() => {
-                  elegirPregunta();
-                  setDialogOpen(true);
+                  if (!hasWrittenTodayState) {
+                    elegirPregunta();
+                    setDialogOpen(true);
+                  }
                 }}
-                disabled={hasWrittenToday()}
+                disabled={hasWrittenTodayState}
               >
-                {hasWrittenToday()
+                {hasWrittenTodayState
                   ? "Ya escribiste hoy 🎉"
                   : "Escribir como me siento"}
               </Button>

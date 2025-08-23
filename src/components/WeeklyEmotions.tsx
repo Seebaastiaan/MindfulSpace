@@ -611,7 +611,7 @@ const WeeklyEmotionsExample: React.FC = () => {
               <button
                 onClick={handleAnalyze}
                 disabled={!user}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-6 rounded-lg transition-colors cursor-pointer"
               >
                 Crear nuevo análisis
               </button>
@@ -638,7 +638,11 @@ const WeeklyEmotionsExample: React.FC = () => {
           {isLoading ? (
             <LoadingSpinner message={loadingStep || "Procesando..."} />
           ) : (
-            <Button onClick={handleAnalyze} disabled={!user}>
+            <Button
+              onClick={handleAnalyze}
+              disabled={!user}
+              className="cursor-pointer"
+            >
               Comenzar primer análisis
             </Button>
           )}
