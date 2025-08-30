@@ -19,6 +19,7 @@ export default function HomePage() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-200">
         {!user ? (
           <GoogleLogin
+            useOneTap={false} // 🚫 Desactiva el inicio rápido (One Tap)
             onSuccess={(credentialResponse) => {
               if (credentialResponse.credential) {
                 const decoded: GoogleUser = jwtDecode(
