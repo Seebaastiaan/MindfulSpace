@@ -113,9 +113,17 @@ export default function ChatPage() {
 
       const data = await res.json();
 
+      let botMessage = data.result || "Lo siento, no pude procesar tu mensaje.";
+
+      // Si es una respuesta de emergencia, agregar un pequeño indicador
+      if (data.isEmergencyResponse) {
+        botMessage +=
+          "\n\n💙 *Respuesta de apoyo automático - El servicio de IA está temporalmente no disponible*";
+      }
+
       // Guardar respuesta del bot
       await addDoc(collection(db, "users", user.uid, "chat"), {
-        text: data.result || "Lo siento, no pude procesar tu mensaje.",
+        text: botMessage,
         sender: "bot",
         createdAt: serverTimestamp(),
       });
@@ -145,20 +153,31 @@ export default function ChatPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+      <div className="flex items-center justify-center min-h-96 p-4">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 max-w-md w-full text-center border border-white/50">
+          <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <span className="text-3xl">💬</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-3">
             Chat de Apoyo Emocional
           </h1>
-          <p className="text-gray-600 mb-6">
-            Inicia sesión para comenzar a chatear con nuestro asistente de apoyo
+          <p className="text-gray-600 mb-8 leading-relaxed">
+            Inicia sesión para comenzar a conversar con nuestro asistente de
+            apoyo emocional
           </p>
           <button
             onClick={signIn}
             disabled={isLoading}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-xl disabled:opacity-60 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105"
           >
-            {isLoading ? "Cargando..." : "Iniciar sesión con Google"}
+            {isLoading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Cargando...</span>
+              </div>
+            ) : (
+              "🔐 Iniciar sesión con Google"
+            )}
           </button>
         </div>
       </div>
@@ -166,125 +185,170 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto w-full flex flex-col flex-1 pb-16">
+    <div className="space-y-6 h-full flex flex-col">
       {/* Header */}
-      <div className="bg-white rounded-t-2xl shadow-lg p-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Chat de Apoyo Emocional
-          </h1>
-          <p className="text-gray-600 text-sm">Asistente disponible 24/7</p>
+      <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-6 border border-white/50">
+        <div className="flex items-center space-x-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <span className="text-2xl">💬</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Chat de Apoyo Emocional
+            </h1>
+            <div className="text-green-600 text-sm flex items-center">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+              Asistente disponible 24/7
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Chat Container */}
-      <div className="bg-white shadow-lg flex-1 overflow-y-auto p-6 border-x flex flex-col">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 text-center">
-            <div className="w-20 h-20 bg-[#FFC0CB] rounded-full flex items-center justify-center mb-4">
-              <SmartToyIcon />
+      <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-white/50 flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-6">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <div className="w-24 h-24 bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
+                <SmartToyIcon
+                  className="text-white"
+                  style={{ fontSize: "2rem" }}
+                />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                ¡Hola! Soy tu asistente de apoyo emocional
+              </h3>
+              <p className="text-gray-600 max-w-md leading-relaxed">
+                Puedes contarme cómo te sientes, compartir tus preocupaciones o
+                simplemente charlar. Estoy aquí para escucharte y brindarte
+                apoyo cuando lo necesites.
+              </p>
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+                <div className="bg-green-50 border border-green-200 rounded-2xl p-3 text-center">
+                  <p className="text-green-700 font-medium text-sm">
+                    💝 Apoyo emocional
+                  </p>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3 text-center">
+                  <p className="text-blue-700 font-medium text-sm">
+                    🧘 Mindfulness
+                  </p>
+                </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-2xl p-3 text-center">
+                  <p className="text-purple-700 font-medium text-sm">
+                    💭 Reflexiones
+                  </p>
+                </div>
+                <div className="bg-pink-50 border border-pink-200 rounded-2xl p-3 text-center">
+                  <p className="text-pink-700 font-medium text-sm">
+                    🌱 Crecimiento personal
+                  </p>
+                </div>
+              </div>
             </div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">
-              ¡Hola! Soy tu asistente de apoyo emocional
-            </h3>
-            <p className="text-gray-500 max-w-md">
-              Puedes contarme cómo te sientes y estaré aquí para escucharte y
-              brindarte apoyo.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4 flex-1">
-            {messages.map((msg, i) => (
-              <div
-                key={msg.id || i}
-                className={`flex ${
-                  msg.sender === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
+          ) : (
+            <div className="space-y-6">
+              {messages.map((msg, i) => (
                 <div
-                  className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${
-                    msg.sender === "user"
-                      ? "flex-row-reverse space-x-reverse"
-                      : ""
+                  key={msg.id || i}
+                  className={`flex ${
+                    msg.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
                   <div
-                    className={`min-w-8 min-h-8 rounded-full flex items-center justify-center text-base leading-none ${
+                    className={`flex items-start space-x-3 max-w-xs lg:max-w-md ${
                       msg.sender === "user"
-                        ? "bg-[#FA506D] text-white"
-                        : "bg-[#c80323] text-white"
+                        ? "flex-row-reverse space-x-reverse"
+                        : ""
                     }`}
                   >
-                    {msg.sender === "user" ? <PersonIcon /> : <SmartToyIcon />}
-                  </div>
+                    <div
+                      className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md ${
+                        msg.sender === "user"
+                          ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+                          : "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                      }`}
+                    >
+                      {msg.sender === "user" ? (
+                        <PersonIcon />
+                      ) : (
+                        <SmartToyIcon />
+                      )}
+                    </div>
 
-                  <div
-                    className={`px-4 py-2 rounded-2xl shadow-sm ${
-                      msg.sender === "user"
-                        ? "bg-[#FA506D] text-white rounded-br-md"
-                        : "bg-gray-100 text-gray-800 rounded-bl-md"
-                    }`}
-                  >
-                    <p className="text-sm break-words">{msg.text}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="flex items-start space-x-2">
-                  <div className="w-8 h-8 bg-[#c80323] rounded-full flex items-center justify-center text-sm text-white">
-                    <SmartToyIcon />
-                  </div>
-                  <div className="bg-gray-100 px-4 py-2 rounded-2xl rounded-bl-md shadow-sm">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.1s" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.2s" }}
-                      ></div>
+                    <div
+                      className={`px-4 py-3 rounded-2xl shadow-sm max-w-full ${
+                        msg.sender === "user"
+                          ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-br-sm"
+                          : "bg-white text-gray-800 rounded-bl-sm border border-gray-100"
+                      }`}
+                    >
+                      <p className="text-sm break-words leading-relaxed">
+                        {msg.text}
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              ))}
+
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-md">
+                      <SmartToyIcon />
+                    </div>
+                    <div className="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
+                        <div
+                          className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input Area */}
+        <div className="p-6 border-t border-gray-100">
+          <div className="flex space-x-4">
+            <input
+              className="flex-1 border-2 border-gray-200 rounded-2xl px-6 py-4 focus:outline-none focus:ring-4 focus:ring-green-500/20 focus:border-green-500 disabled:bg-gray-50 disabled:text-gray-400 transition-all duration-300"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Escribe tu mensaje aquí..."
+              onKeyDown={handleKeyPress}
+              disabled={isTyping}
+            />
+
+            <button
+              className={`px-6 py-4 rounded-2xl font-semibold transition-all duration-300 flex items-center justify-center min-w-[120px] ${
+                isTyping || !input.trim()
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg hover:shadow-xl hover:scale-105 transform"
+              }`}
+              onClick={sendMessage}
+              disabled={isTyping || !input.trim()}
+            >
+              {isTyping ? (
+                <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <SendIcon />
+                  <span className="hidden sm:block">Enviar</span>
+                </div>
+              )}
+            </button>
           </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input */}
-      <div className="bg-white rounded-b-2xl shadow-lg p-6">
-        <div className="flex w-full space-x-4">
-          <input
-            className="w-3/4 border border-gray-300 rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Escribe tu mensaje"
-            onKeyDown={handleKeyPress}
-            disabled={isTyping}
-          />
-
-          <button
-            className={`w-1/4 px-6 py-3 cursor-pointer rounded-full font-semibold transition duration-200 ${
-              isTyping || !input.trim()
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-[#FFC0CB]  text-white shadow-md hover:shadow-lg"
-            }`}
-            onClick={sendMessage}
-            disabled={isTyping || !input.trim()}
-          >
-            {isTyping ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-500 mx-auto"></div>
-            ) : (
-              <SendIcon />
-            )}
-          </button>
         </div>
       </div>
     </div>

@@ -5,89 +5,111 @@ interface Tip {
   title: string;
   content: string;
   icon: typeof Lightbulb;
-  color: string;
+  category: string;
+  gradient: string;
 }
 
 // Tips constantes fuera del componente
 const TIPS: Tip[] = [
   // Mindfulness
   {
-    title: "Respira profundo",
-    content: "4 segundos inhala, 4 mantén, 6 exhala. Repite 3 veces.",
-    icon: Brain,
-    color: "bg-purple-50 border-purple-200 text-purple-700",
-  },
-  {
-    title: "5-4-3-2-1",
+    title: "Respiración 4-7-8",
     content:
-      "5 cosas que ves, 4 que tocas, 3 que oyes, 2 que hueles, 1 que saboreas.",
-    icon: Star,
-    color: "bg-indigo-50 border-indigo-200 text-indigo-700",
+      "Inhala 4 segundos, mantén 7, exhala 8. Perfecto para calmar la ansiedad.",
+    icon: Brain,
+    category: "Mindfulness",
+    gradient: "from-purple-400 to-indigo-500",
   },
   {
-    title: "Pausa digital",
-    content: "Antes de abrir el teléfono, pregúntate: '¿Para qué?'",
+    title: "Técnica 5-4-3-2-1",
+    content:
+      "Conecta con el presente: 5 cosas que ves, 4 que tocas, 3 que oyes, 2 que hueles, 1 que saboreas.",
+    icon: Star,
+    category: "Mindfulness",
+    gradient: "from-indigo-400 to-purple-500",
+  },
+  {
+    title: "Pausa consciente",
+    content:
+      "Antes de revisar tu teléfono, toma 3 respiraciones profundas y pregúntate qué necesitas realmente.",
     icon: Brain,
-    color: "bg-purple-50 border-purple-200 text-purple-700",
+    category: "Mindfulness",
+    gradient: "from-teal-400 to-blue-500",
   },
   // Gratitud
   {
-    title: "3 gracias",
+    title: "Tres bendiciones",
     content:
-      "Al despertar, piensa en 3 cosas por las que te sientes agradecido.",
+      "Cada mañana, identifica 3 cosas por las que te sientes genuinamente agradecido hoy.",
     icon: Heart,
-    color: "bg-rose-50 border-rose-200 text-rose-700",
+    category: "Gratitud",
+    gradient: "from-rose-400 to-pink-500",
   },
   {
-    title: "Nota mental",
+    title: "Carta mental",
     content:
-      "Escribe mentalmente una nota de agradecimiento a alguien especial.",
+      "Escribe mentalmente una nota de agradecimiento a alguien que haya impactado positivamente tu vida.",
     icon: Heart,
-    color: "bg-rose-50 border-rose-200 text-rose-700",
+    category: "Gratitud",
+    gradient: "from-pink-400 to-rose-500",
   },
   {
-    title: "Mejor momento",
-    content: "Antes de dormir, recuerda el mejor momento del día.",
+    title: "Momento dorado",
+    content:
+      "Antes de dormir, revive el mejor momento del día con todos los detalles sensoriales.",
     icon: Star,
-    color: "bg-amber-50 border-amber-200 text-amber-700",
+    category: "Gratitud",
+    gradient: "from-amber-400 to-orange-500",
   },
   // Autocuidado
   {
-    title: "Hidrata consciente",
-    content: "Bebe un vaso de agua despacio, siente cómo te nutre.",
+    title: "Hidratación mindful",
+    content:
+      "Bebe agua lentamente, sintiendo cómo cada sorbo nutre tu cuerpo y energiza tu mente.",
     icon: Smile,
-    color: "bg-blue-50 border-blue-200 text-blue-700",
+    category: "Autocuidado",
+    gradient: "from-blue-400 to-cyan-500",
   },
   {
-    title: "Pausa activa",
-    content: "Cada hora, levántate y camina 2 minutos.",
+    title: "Micro-movimiento",
+    content:
+      "Cada hora, levántate y haz 10 estiramientos suaves. Tu cuerpo y mente te lo agradecerán.",
     icon: Smile,
-    color: "bg-green-50 border-green-200 text-green-700",
+    category: "Autocuidado",
+    gradient: "from-green-400 to-emerald-500",
   },
   {
-    title: "Límite digital",
-    content: "Pon una hora límite para redes sociales hoy.",
+    title: "Desintoxicación digital",
+    content:
+      "Establece 30 minutos libres de pantallas antes de dormir para mejorar tu descanso.",
     icon: Brain,
-    color: "bg-teal-50 border-teal-200 text-teal-700",
+    category: "Autocuidado",
+    gradient: "from-violet-400 to-purple-500",
   },
   // Motivación
   {
-    title: "2 minutos",
-    content: "Elige una tarea pendiente y hazla solo por 2 minutos.",
+    title: "Regla de los 2 minutos",
+    content:
+      "Si algo toma menos de 2 minutos, hazlo ahora. Si toma más, programa cuándo lo harás.",
     icon: Star,
-    color: "bg-orange-50 border-orange-200 text-orange-700",
+    category: "Productividad",
+    gradient: "from-orange-400 to-red-500",
   },
   {
-    title: "Celebra pequeño",
-    content: "¿Hiciste la cama? ¡Genial! Cada pequeño acto cuenta.",
+    title: "Celebra lo pequeño",
+    content:
+      "Reconoce cada pequeño logro del día. Cada paso cuenta en tu crecimiento personal.",
     icon: Smile,
-    color: "bg-yellow-50 border-yellow-200 text-yellow-700",
+    category: "Motivación",
+    gradient: "from-yellow-400 to-orange-500",
   },
   {
-    title: "Tu yo de mañana",
-    content: "Pregúntate: '¿Mi yo de mañana me agradecerá esto?'",
+    title: "Yo futuro",
+    content:
+      "En cada decisión pregúntate: '¿Mi yo de mañana me agradecerá esta elección?'",
     icon: Lightbulb,
-    color: "bg-emerald-50 border-emerald-200 text-emerald-700",
+    category: "Reflexión",
+    gradient: "from-emerald-400 to-teal-500",
   },
 ];
 
@@ -112,7 +134,7 @@ export default function DailyTipCard() {
       const randomIndex = Math.floor(Math.random() * TIPS.length);
       setCurrentTip(TIPS[randomIndex]);
       setIsLoading(false);
-    }, 300);
+    }, 400);
   };
 
   // Cargar tip inicial
@@ -125,56 +147,87 @@ export default function DailyTipCard() {
   const IconComponent = currentTip.icon;
 
   return (
-    <div className="flex flex-col justify-center min-h-[120px]">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <div
-            className={`p-1.5 rounded-full ${currentTip.color.split(" ")[0]} ${
-              currentTip.color.split(" ")[1]
-            }`}
-          >
-            <Lightbulb size={12} className={currentTip.color.split(" ")[2]} />
-          </div>
-          <h3 className="text-sm font-medium text-gray-600">Tip del día</h3>
-        </div>
-
-        <button
-          onClick={getRandomTip}
-          disabled={isLoading}
-          className="p-1 hover:bg-gray-50 rounded-full transition-colors duration-200 cursor-pointer"
-          title="Nuevo tip"
-        >
-          <RefreshCw
-            size={12}
-            className={`text-gray-400 hover:text-gray-600 transition-all duration-200 ${
-              isLoading ? "animate-spin" : "hover:rotate-180"
-            }`}
-          />
-        </button>
-      </div>
-
-      {/* Contenido */}
-      <div className="flex items-start space-x-3 mb-3">
-        <div className="flex-shrink-0">
-          <IconComponent size={16} className={currentTip.color.split(" ")[2]} />
-        </div>
-        <div className="flex-1">
-          <h4 className="font-semibold text-gray-800 text-sm mb-1 leading-tight">
-            {currentTip.title}
-          </h4>
-          <p className="text-gray-600 text-xs leading-relaxed">
-            {currentTip.content}
-          </p>
-        </div>
-      </div>
-
-      {/* Indicador */}
+    <div className="relative overflow-hidden">
+      {/* Background gradient */}
       <div
-        className={`h-1 rounded-full ${
-          currentTip.color.split(" ")[0]
-        } opacity-30`}
+        className={`absolute inset-0 bg-gradient-to-br ${currentTip.gradient} opacity-5 rounded-xl`}
       ></div>
+
+      <div className="relative p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <div
+              className={`w-8 h-8 rounded-xl bg-gradient-to-r ${currentTip.gradient} flex items-center justify-center`}
+            >
+              <Lightbulb className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="font-semibold text-gray-900">Tip del Día</h3>
+          </div>
+
+          <button
+            onClick={getRandomTip}
+            disabled={isLoading}
+            className="p-2 hover:bg-gray-50 rounded-xl transition-all duration-200 cursor-pointer group"
+            title="Nuevo tip"
+          >
+            <RefreshCw
+              className={`w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-all duration-300 ${
+                isLoading ? "animate-spin" : "group-hover:rotate-180"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Contenido */}
+        <div className="space-y-3">
+          {/* Category badge */}
+          <div
+            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${currentTip.gradient} text-white`}
+          >
+            {currentTip.category}
+          </div>
+
+          <div className="flex items-start space-x-3">
+            <div
+              className={`w-10 h-10 rounded-2xl bg-gradient-to-r ${currentTip.gradient} flex items-center justify-center flex-shrink-0`}
+            >
+              <IconComponent className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 space-y-2">
+              <h4 className="font-bold text-gray-900 leading-tight">
+                {currentTip.title}
+              </h4>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {currentTip.content}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress indicator */}
+        <div className="mt-4 flex space-x-1">
+          {TIPS.map((_, index) => (
+            <div
+              key={index}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                TIPS.indexOf(currentTip) === index
+                  ? `bg-gradient-to-r ${currentTip.gradient} w-6`
+                  : "bg-gray-200 w-2"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Loading overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
+            <div
+              className={`w-6 h-6 rounded-full bg-gradient-to-r ${currentTip.gradient} animate-pulse`}
+            ></div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

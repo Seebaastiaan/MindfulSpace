@@ -1,4 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  GoogleGenerativeAI,
+  HarmBlockThreshold,
+  HarmCategory,
+} from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
@@ -17,41 +21,101 @@ export async function POST(req: NextRequest) {
 
     console.log("Enviando a Google Gemini:", text);
 
+    // Verificar longitud de API key (las keys de Google suelen tener 39 caracteres)
+    if (process.env.GOOGLE_API_KEY!.length < 20) {
+      throw new Error("API key parece ser inválida");
+    }
+
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       generationConfig: {
-        temperature: 0.7,
+        temperature: 0.8,
         topP: 0.9,
-        maxOutputTokens: 200,
+        maxOutputTokens: 150,
       },
+      safetySettings: [
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        },
+      ],
     });
 
-    const prompt = `Como psicólogo empático y comprensivo especializado en apoyo emocional, responde de manera cálida, positiva y profesional a esta persona que dice: "${text}"
+    const prompt = `Eres un asistente de apoyo emocional empático y profesional. Una persona te está compartiendo: "${text}"
 
-Características de tu respuesta:
-- Empática y comprensiva
-- Breve pero significativa
-- Enfocada en validar emociones y ofrecer apoyo
+Responde de manera:
+- Cálida y comprensiva
+- Breve (máximo 2-3 oraciones)
+- Validando sus emociones
+- Ofreciendo apoyo constructivo
 - En español
-- Tono cálido y profesional
-- No uses jerga técnica
-- No uses muletillas
-- Varía tus inicios de frase, evita repetir siempre "Entiendo". 
+- Con tono profesional pero humano
 
-Respuesta empática:`;
+Tu respuesta:`;
 
     const result = await model.generateContent(prompt);
+    console.log("Result object:", result);
+
     const response = await result.response;
+    console.log("Response object:", response);
 
     if (!response) {
       throw new Error("No se recibió respuesta del modelo");
     }
 
-    const generatedText =
-      response.text() ||
-      "Lo siento, no pude generar una respuesta en este momento. ¿Podrías contarme un poco más sobre cómo te sientes?";
+    // Intentar diferentes maneras de obtener el texto
+    let generatedText;
+    try {
+      generatedText = response.text();
+      console.log("response.text():", generatedText);
+    } catch (textError) {
+      console.error("Error al obtener text():", textError);
+      // Intentar con candidates
+      try {
+        if (response.candidates && response.candidates.length > 0) {
+          const candidate = response.candidates[0];
+          if (
+            candidate.content &&
+            candidate.content.parts &&
+            candidate.content.parts.length > 0
+          ) {
+            generatedText = candidate.content.parts[0].text;
+            console.log("Texto desde candidates:", generatedText);
+          }
+        }
+      } catch (candidateError) {
+        console.error("Error al obtener desde candidates:", candidateError);
+      }
+    }
 
-    console.log("Respuesta de Gemini:", generatedText);
+    // Verificar si la respuesta fue bloqueada por filtros de seguridad
+    if (response.candidates && response.candidates.length > 0) {
+      const candidate = response.candidates[0];
+      if (candidate.finishReason && candidate.finishReason !== "STOP") {
+        console.log("Respuesta bloqueada por:", candidate.finishReason);
+        generatedText =
+          "Entiendo que quieres compartir algo conmigo. Me gustaría ayudarte, pero necesito que reformules tu mensaje de una manera diferente para poder responder adecuadamente.";
+      }
+    }
+
+    if (!generatedText || generatedText.trim() === "") {
+      generatedText =
+        "Lo siento, no pude generar una respuesta en este momento. ¿Podrías contarme un poco más sobre cómo te sientes?";
+    }
+
+    console.log("Respuesta final de Gemini:", generatedText);
 
     return NextResponse.json({
       result: generatedText.trim(),
@@ -59,10 +123,26 @@ Respuesta empática:`;
   } catch (err: unknown) {
     console.error("Error de Google Gemini:", err);
 
-    const errorMessage =
-      err instanceof Error && err.message.includes("API_KEY")
-        ? "Error de configuración. Por favor verifica tu API key."
-        : "Lo siento, estoy teniendo dificultades técnicas en este momento. ¿Podrías intentar de nuevo?";
+    let errorMessage =
+      "Lo siento, estoy teniendo dificultades técnicas en este momento. ¿Podrías intentar de nuevo?";
+
+    if (err instanceof Error) {
+      if (err.message.includes("API_KEY") || err.message.includes("API key")) {
+        errorMessage = "Error de configuración. Por favor verifica tu API key.";
+      } else if (
+        err.message.includes("not found") ||
+        err.message.includes("404")
+      ) {
+        errorMessage =
+          "El modelo de IA no está disponible temporalmente. Estoy trabajando en solucionarlo.";
+      } else if (
+        err.message.includes("quota") ||
+        err.message.includes("limit")
+      ) {
+        errorMessage =
+          "He alcanzado el límite de uso por hoy. Inténtalo más tarde.";
+      }
+    }
 
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
