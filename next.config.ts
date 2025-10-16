@@ -63,14 +63,6 @@ const nextConfig: NextConfig = {
       "@mui/icons-material",
     ],
   },
-
-  // Configuración del compilador para optimización
-  compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
-  },
-
-  // Configuración de output para Vercel
-  output: "standalone",
 };
 
 export default nextConfig;
