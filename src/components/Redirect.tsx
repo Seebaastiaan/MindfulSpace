@@ -63,8 +63,10 @@ export default function Redirect() {
         // Usuario autenticado, iniciar proceso de carga
         startRedirectProcess();
       } else {
-        // Usuario no autenticado, redirigir a login
-        router.push("/");
+        // Usuario no autenticado, redirigir a login después de un delay
+        setTimeout(() => {
+          router.push("/");
+        }, 100);
       }
     });
 
@@ -73,10 +75,22 @@ export default function Redirect() {
       startRedirectProcess();
     }
 
+    // Timeout de seguridad: si después de 10 segundos no se redirige, forzar redirección
+    const safetyTimeout = setTimeout(() => {
+      if (auth.currentUser) {
+        // Si hay usuario, ir al main
+        router.push("/main");
+      } else {
+        // Si no hay usuario, regresar al login
+        router.push("/");
+      }
+    }, 10000);
+
     return () => {
       unsubscribe();
       if (interval) clearInterval(interval);
       if (textInterval) clearInterval(textInterval);
+      clearTimeout(safetyTimeout);
     };
   }, [router, loadingMessages]);
 

@@ -16,107 +16,79 @@ import {
   Target,
   Zap,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function DemoPage() {
   const [currentView, setCurrentView] = useState("dashboard");
-  const [progress, setProgress] = useState(0);
 
-  // Simular progreso de carga
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => (prev >= 100 ? 100 : prev + 2));
-    }, 50);
+  // Memoizar datos para evitar recreaciones innecesarias
+  const demoData = useMemo(
+    () => ({
+      totalEntries: 24,
+      currentStreak: 7,
+      wellnessScore: 85,
+      emotions: [
+        {
+          emotion: "Alegría",
+          count: 45,
+          color: "from-yellow-400 to-orange-500",
+          icon: "😊",
+        },
+        {
+          emotion: "Calma",
+          count: 35,
+          color: "from-blue-400 to-cyan-500",
+          icon: "😌",
+        },
+        {
+          emotion: "Motivación",
+          count: 30,
+          color: "from-green-400 to-emerald-500",
+          icon: "💪",
+        },
+        {
+          emotion: "Reflexión",
+          count: 25,
+          color: "from-purple-400 to-indigo-500",
+          icon: "🤔",
+        },
+        {
+          emotion: "Gratitud",
+          count: 20,
+          color: "from-pink-400 to-rose-500",
+          icon: "🙏",
+        },
+      ],
+    }),
+    []
+  );
 
-    setTimeout(() => clearInterval(interval), 2500);
-    return () => clearInterval(interval);
-  }, []);
-
-  const demoData = {
-    totalEntries: 24,
-    currentStreak: 7,
-    wellnessScore: 85,
-    emotions: [
+  const demoEntries = useMemo(
+    () => [
       {
-        emotion: "Alegría",
-        count: 45,
-        color: "from-yellow-400 to-orange-500",
-        icon: "😊",
+        date: "15 de Octubre, 2025",
+        content:
+          "Hoy fue un día increíble en el trabajo. Me siento muy motivado con el nuevo proyecto que empezamos...",
+        mood: "😊 Positivo",
+        sentiment: "Alegría, Motivación",
       },
       {
-        emotion: "Calma",
-        count: 35,
-        color: "from-blue-400 to-cyan-500",
-        icon: "😌",
+        date: "14 de Octubre, 2025",
+        content:
+          "Pasé tiempo meditando en el parque. La tranquilidad de la naturaleza me ayudó a reflexionar sobre mis objetivos...",
+        mood: "😌 Sereno",
+        sentiment: "Calma, Reflexión",
       },
       {
-        emotion: "Motivación",
-        count: 30,
-        color: "from-green-400 to-emerald-500",
-        icon: "💪",
-      },
-      {
-        emotion: "Reflexión",
-        count: 25,
-        color: "from-purple-400 to-indigo-500",
-        icon: "🤔",
-      },
-      {
-        emotion: "Gratitud",
-        count: 20,
-        color: "from-pink-400 to-rose-500",
-        icon: "🙏",
+        date: "13 de Octubre, 2025",
+        content:
+          "Agradecido por las pequeñas cosas: mi café matutino, la llamada de mamá, y el hermoso atardecer de hoy...",
+        mood: "🙏 Agradecido",
+        sentiment: "Gratitud, Alegría",
       },
     ],
-  };
-
-  const demoEntries = [
-    {
-      date: "15 de Octubre, 2025",
-      content:
-        "Hoy fue un día increíble en el trabajo. Me siento muy motivado con el nuevo proyecto que empezamos...",
-      mood: "😊 Positivo",
-      sentiment: "Alegría, Motivación",
-    },
-    {
-      date: "14 de Octubre, 2025",
-      content:
-        "Pasé tiempo meditando en el parque. La tranquilidad de la naturaleza me ayudó a reflexionar sobre mis objetivos...",
-      mood: "😌 Sereno",
-      sentiment: "Calma, Reflexión",
-    },
-    {
-      date: "13 de Octubre, 2025",
-      content:
-        "Agradecido por las pequeñas cosas: mi café matutino, la llamada de mamá, y el hermoso atardecer de hoy...",
-      mood: "🙏 Agradecido",
-      sentiment: "Gratitud, Alegría",
-    },
-  ];
-
-  if (progress < 100) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-center space-y-6">
-          <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-3xl flex items-center justify-center mx-auto shadow-2xl animate-pulse">
-            <Brain className="w-12 h-12 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Cargando Demo de MindfulSpace
-          </h1>
-          <div className="w-80 bg-gray-200 rounded-full h-3 mx-auto overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 h-3 rounded-full transition-all duration-200"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <p className="text-gray-600">
-            Preparando tu vista previa personalizada...
-          </p>
-        </div>
-      </div>
-    );
-  }
+    []
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
@@ -185,7 +157,7 @@ export default function DemoPage() {
       </div>
 
       <div className="max-w-7xl mx-auto p-6">
-        {/* Dashboard View */}
+        {/* Renderizar solo la vista actual para mejorar performance */}
         {currentView === "dashboard" && (
           <div className="space-y-6">
             {/* Welcome Section */}
@@ -243,16 +215,16 @@ export default function DemoPage() {
               </Cards>
             </div>
 
-            {/* Recent Entries */}
+            {/* Recent Entries - Simplificado */}
             <Cards variant="gradient">
               <h2 className="text-xl font-bold text-gray-900 mb-4">
                 Entradas Recientes
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {demoEntries.slice(0, 2).map((entry, index) => (
                   <div
                     key={index}
-                    className="bg-white/80 backdrop-blur-sm rounded-xl p-4"
+                    className="bg-white rounded-lg p-4 border border-gray-100"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-gray-500">
@@ -262,15 +234,12 @@ export default function DemoPage() {
                         {entry.mood}
                       </span>
                     </div>
-                    <p className="text-gray-700 mb-2">{entry.content}</p>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-gray-500">
-                        Sentimientos detectados:
-                      </span>
-                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                        {entry.sentiment}
-                      </span>
-                    </div>
+                    <p className="text-gray-700 mb-2 text-sm leading-relaxed">
+                      {entry.content.substring(0, 100)}...
+                    </p>
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                      {entry.sentiment}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -292,30 +261,23 @@ export default function DemoPage() {
               </div>
             </Cards>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {demoEntries.map((entry, index) => (
                 <Cards key={index} variant="bordered">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-gray-500">{entry.date}</span>
-                    <span className="text-sm font-medium text-indigo-600">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-500">{entry.date}</span>
+                    <span className="text-xs font-medium text-indigo-600">
                       {entry.mood}
                     </span>
                   </div>
-                  <p className="text-gray-700 mb-3 leading-relaxed">
-                    {entry.content}
+                  <p className="text-gray-700 mb-2 leading-relaxed text-sm">
+                    {entry.content.substring(0, 150)}...
                   </p>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-gray-500">
-                        Análisis IA:
-                      </span>
-                      <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                        {entry.sentiment}
-                      </span>
-                    </div>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <Heart className="w-4 h-4" />
-                    </button>
+                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                      {entry.sentiment}
+                    </span>
+                    <Heart className="w-3 h-3 text-gray-400" />
                   </div>
                 </Cards>
               ))}
@@ -342,57 +304,52 @@ export default function DemoPage() {
               </div>
             </Cards>
 
-            <Cards variant="bordered" className="h-96">
-              <div className="space-y-4 h-full flex flex-col">
-                <div className="flex-1 space-y-3 overflow-y-auto">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                      <Brain className="w-4 h-4 text-white" />
+            <Cards variant="bordered" className="h-80">
+              <div className="space-y-3 h-full flex flex-col">
+                <div className="flex-1 space-y-2 overflow-y-auto">
+                  <div className="flex items-start space-x-2">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                      <Brain className="w-3 h-3 text-white" />
                     </div>
-                    <div className="bg-green-50 rounded-lg p-3 max-w-xs">
-                      <p className="text-sm text-gray-700">
-                        ¡Hola! Soy tu asistente de bienestar. ¿En qué puedo
-                        ayudarte hoy?
+                    <div className="bg-green-50 rounded p-2 max-w-xs">
+                      <p className="text-xs text-gray-700">
+                        ¡Hola! Soy tu asistente. ¿Cómo te sientes?
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3 justify-end">
-                    <div className="bg-purple-500 text-white rounded-lg p-3 max-w-xs">
-                      <p className="text-sm">
-                        Me siento un poco abrumado con el trabajo. ¿Tienes algún
-                        consejo?
+                  <div className="flex items-start space-x-2 justify-end">
+                    <div className="bg-purple-500 text-white rounded p-2 max-w-xs">
+                      <p className="text-xs">
+                        Me siento abrumado con el trabajo.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                      <Brain className="w-4 h-4 text-white" />
+                  <div className="flex items-start space-x-2">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                      <Brain className="w-3 h-3 text-white" />
                     </div>
-                    <div className="bg-green-50 rounded-lg p-3 max-w-sm">
-                      <p className="text-sm text-gray-700">
-                        Entiendo que te sientes abrumado. Aquí tienes algunas
-                        estrategias que podrían ayudarte:
-                        <br />
-                        <br />
-                        1. Toma descansos regulares cada hora 2. Prioriza las
-                        tareas más importantes 3. Practica respiración profunda
-                        por 5 minutos
+                    <div className="bg-green-50 rounded p-2 max-w-sm">
+                      <p className="text-xs text-gray-700">
+                        Entiendo. Prueba estos consejos:
+                        <br />• Descansos cada hora
+                        <br />• Prioriza tareas importantes
+                        <br />• Respiración profunda 5 min
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2 pt-4 border-t">
+                <div className="flex items-center space-x-2 pt-2 border-t">
                   <input
                     type="text"
-                    placeholder="Escribe tu mensaje aquí..."
-                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Mensaje demo..."
+                    className="flex-1 px-3 py-1 border border-gray-200 rounded text-sm"
                     disabled
                   />
-                  <button className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
-                    <ArrowRight className="w-4 h-4" />
+                  <button className="px-3 py-1 bg-purple-500 text-white rounded text-sm">
+                    <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -419,8 +376,8 @@ export default function DemoPage() {
               </div>
             </Cards>
 
-            {/* Emotion Distribution */}
-            <Cards variant="gradient">
+            {/* Emotion Distribution - Optimizada */}
+            <Cards variant="bordered">
               <div className="flex items-center space-x-3 mb-6">
                 <PieChart className="w-6 h-6 text-indigo-600" />
                 <h2 className="text-xl font-bold text-gray-900">
@@ -428,16 +385,13 @@ export default function DemoPage() {
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {demoData.emotions.map((emotion, index) => (
-                  <div
-                    key={index}
-                    className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-gray-100"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-2xl">{emotion.icon}</span>
-                        <span className="font-semibold text-gray-900">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                {demoData.emotions.slice(0, 6).map((emotion, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-3 border">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-1">
+                        <span className="text-lg">{emotion.icon}</span>
+                        <span className="font-medium text-sm text-gray-900">
                           {emotion.emotion}
                         </span>
                       </div>
@@ -445,9 +399,9 @@ export default function DemoPage() {
                         {emotion.count}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded h-1.5">
                       <div
-                        className={`bg-gradient-to-r ${emotion.color} h-2 rounded-full transition-all duration-500`}
+                        className="bg-indigo-500 h-1.5 rounded"
                         style={{ width: `${emotion.count}%` }}
                       ></div>
                     </div>
@@ -456,56 +410,39 @@ export default function DemoPage() {
               </div>
             </Cards>
 
-            {/* Insights Cards */}
+            {/* Insights Cards - Simplificadas */}
             <Cards variant="bordered">
-              <div className="flex items-center space-x-3 mb-6">
+              <div className="flex items-center space-x-3 mb-4">
                 <Zap className="w-6 h-6 text-yellow-600" />
                 <h2 className="text-xl font-bold text-gray-900">
-                  Recomendaciones Personalizadas
+                  Recomendaciones
                 </h2>
               </div>
 
-              <div className="space-y-4">
-                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-4 border border-yellow-200">
-                  <div className="flex items-start space-x-3">
-                    <span className="text-2xl">🌅</span>
+              <div className="space-y-3">
+                <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-lg">🌅</span>
                     <div>
-                      <h4 className="font-semibold text-yellow-800 mb-1">
+                      <h4 className="font-medium text-yellow-800 text-sm">
                         Mantén tus rutinas matutinas
                       </h4>
-                      <p className="text-yellow-700 text-sm">
-                        Tus entradas muestran mayor positividad cuando escribes
-                        por las mañanas. ¡Sigue así!
+                      <p className="text-yellow-700 text-xs">
+                        Mayor positividad en las mañanas. ¡Sigue así!
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-200">
-                  <div className="flex items-start space-x-3">
-                    <span className="text-2xl">🎯</span>
+                <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-lg">🎯</span>
                     <div>
-                      <h4 className="font-semibold text-green-800 mb-1">
-                        Excelente progreso emocional
+                      <h4 className="font-medium text-green-800 text-sm">
+                        Excelente progreso
                       </h4>
-                      <p className="text-green-700 text-sm">
-                        Tu puntuación de bienestar ha aumentado un 15% en las
-                        últimas semanas.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200">
-                  <div className="flex items-start space-x-3">
-                    <span className="text-2xl">🏆</span>
-                    <div>
-                      <h4 className="font-semibold text-blue-800 mb-1">
-                        ¡Racha de 7 días!
-                      </h4>
-                      <p className="text-blue-700 text-sm">
-                        Has mantenido una excelente consistencia. Intenta llegar
-                        a los 14 días.
+                      <p className="text-green-700 text-xs">
+                        Bienestar aumentado 15% en las últimas semanas.
                       </p>
                     </div>
                   </div>
@@ -516,19 +453,18 @@ export default function DemoPage() {
         )}
       </div>
 
-      {/* CTA Footer */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-8 mt-12">
+      {/* CTA Footer - Simplificado */}
+      <div className="bg-purple-600 text-white p-6 mt-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">¿Te gusta lo que ves?</h2>
-          <p className="text-purple-100 mb-6">
+          <h2 className="text-2xl font-bold mb-2">¿Te gusta lo que ves?</h2>
+          <p className="text-purple-100 mb-4 text-sm">
             Registrate gratis y comienza tu viaje hacia un mejor bienestar
-            mental
           </p>
           <button
             onClick={() => window.open("/", "_blank")}
-            className="px-8 py-4 bg-white text-purple-600 rounded-2xl font-bold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            className="px-6 py-3 bg-white text-purple-600 rounded-lg font-semibold hover:bg-gray-100"
           >
-            Empezar Gratis con Google
+            Empezar Gratis
           </button>
         </div>
       </div>

@@ -33,24 +33,35 @@ export default function HomePage() {
   // Detectar si ya hay un usuario logueado
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
-      if (firebaseUser) setUser(firebaseUser);
+      setUser(firebaseUser); // Actualizar estado con el usuario actual (null o user)
     });
     return () => unsubscribe();
   }, []);
 
-  // Limpiar sesión anterior y deshabilitar autoselección de cuenta Google
+  // Solo limpiar autoselección de Google, NO hacer signOut si hay usuario válido
   useEffect(() => {
-    const cleanPreviousSession = async () => {
+    const initializeAuth = async () => {
       try {
-        await signOut(auth);
+        // Solo deshabilitar autoselección de Google, no cerrar sesión existente
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).google?.accounts?.id?.disableAutoSelect?.();
+
+        // Si no hay usuario después de un tiempo, asegurarse de que no hay sesiones fantasma
+        setTimeout(() => {
+          if (!auth.currentUser && !user) {
+            // Solo hacer signOut si definitivamente no hay usuario
+            signOut(auth).catch(() => {
+              // Ignorar errores si no hay sesión que cerrar
+            });
+          }
+        }, 1000);
       } catch (err) {
-        console.warn("No se pudo limpiar sesión anterior:", err);
+        console.warn("Error en inicialización de auth:", err);
       }
     };
-    cleanPreviousSession();
-  }, []);
+
+    initializeAuth();
+  }, [user]);
 
   // Testimonials carousel
   useEffect(() => {
