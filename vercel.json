@@ -10,9 +10,6 @@
     }
   },
   "crons": [],
-  "env": {
-    "NEXT_PUBLIC_VERCEL_ENV": "@vercel-env"
-  },
   "regions": ["iad1"],
   "build": {
     "env": {
