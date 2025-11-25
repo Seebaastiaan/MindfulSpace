@@ -294,20 +294,30 @@ export default function ChatPage() {
               {isTyping && (
                 <div className="flex justify-start">
                   <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-md">
+                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-md animate-pulse">
                       <SmartToyIcon />
                     </div>
-                    <div className="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
-                        <div
-                          className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.1s" }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 bg-green-500 rounded-full animate-bounce"
-                          style={{ animationDelay: "0.2s" }}
-                        ></div>
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 px-6 py-4 rounded-2xl rounded-bl-sm shadow-lg">
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex space-x-1">
+                            <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-bounce"></div>
+                            <div
+                              className="w-2.5 h-2.5 bg-green-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.1s" }}
+                            ></div>
+                            <div
+                              className="w-2.5 h-2.5 bg-green-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.2s" }}
+                            ></div>
+                          </div>
+                          <span className="text-green-700 text-sm font-medium animate-pulse">
+                            Pensando...
+                          </span>
+                        </div>
+                        <div className="w-48 h-1 bg-green-200 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 animate-pulse"></div>
+                        </div>
                       </div>
                     </div>
                   </div>

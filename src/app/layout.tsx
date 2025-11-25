@@ -101,7 +101,9 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1, maximum-scale=5"
         />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }
